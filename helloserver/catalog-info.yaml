@@ -12,6 +12,9 @@ metadata:
     - url: https://github.com/Kheops-org/go-apps/tree/master/helloserver
       title: Source Code
       icon: github
+  tags:
+    - go
+    - hello-world
 spec:
   type: service
   lifecycle: experimental
