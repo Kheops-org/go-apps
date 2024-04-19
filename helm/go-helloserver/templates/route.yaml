@@ -5,7 +5,7 @@ metadata:
 spec:
   host: {{ .Values.route.host }}
   port:
-    targetPort: https
+    targetPort: http
   to:
     kind: Service
     name: {{ include "go-helloserver.fullname" . }}
