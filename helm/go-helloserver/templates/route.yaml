@@ -1,0 +1,12 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: {{ include "go-helloserver.fullname" . }}
+spec:
+  host: {{ .Values.route.host }}
+  port:
+    targetPort: https
+  to:
+    kind: Service
+    name: {{ include "go-helloserver.fullname" . }}
+

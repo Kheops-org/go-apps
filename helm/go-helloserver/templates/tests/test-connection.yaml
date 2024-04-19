@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "go-helloserver.fullname" . }}-test-connection"
+  labels:
+    {{- include "go-helloserver.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['wget']
+      args: ['{{ include "go-helloserver.fullname" . }}:{{ .Values.service.port }}']
+  restartPolicy: Never
