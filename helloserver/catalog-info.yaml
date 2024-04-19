@@ -15,6 +15,9 @@ metadata:
   tags:
     - go
     - hello-world
+  metadata:
+    annotations:
+      argocd/app-name: go-helloserver
 spec:
   type: service
   lifecycle: experimental
