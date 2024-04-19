@@ -1,0 +1,18 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: go-helloserver
+  description: |
+    [The Go HelloServer example project](https://github.com/Kheops-org/go-apps/tree/master/helloserver) is a simple example go app
+    - It goes brr
+    - It goes Go
+    - It doesn't rickroll
+    - Let's Go
+  links:
+    - url: https://github.com/Kheops-org/go-apps/tree/master/helloserver
+      title: Source Code
+      icon: github
+spec:
+  type: service
+  lifecycle: experimental
+  owner: team-c
