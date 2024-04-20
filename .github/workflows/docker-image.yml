@@ -33,7 +33,7 @@ jobs:
     - name: Build and Push Docker Image
       uses: docker/build-push-action@v3
       with:
-        context: .
+        context: ./helloserver
         push: true
         tags: registry.nationtech.io/go-helloserver:${{ steps.generate-tag.outputs.tag }}
 
