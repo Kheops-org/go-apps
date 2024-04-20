@@ -36,13 +36,18 @@ jobs:
         context: ./helloserver
         push: true
         tags: registry.nationtech.io/go-helloserver:${{ steps.generate-tag.outputs.tag }}
-
+    
     - name: Update Helm Chart Values
       working-directory: .
       run: |
         sed -i "s/tag: .*/tag: ${{ steps.generate-tag.outputs.tag }}/" ./helm/go-helloserver/values.yaml
         git config user.name "GitHub Actions"
         git config user.email "actions@github.com"
+        git diff
         git add ./helm/go-helloserver/values.yaml
         git commit -m "Upgraded go-helloserver deployment to ${{ steps.generate-tag.outputs.tag }}"
-        git push
+    - name: Push changes
+      uses: ad-m/github-push-action@master
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        branch: ${{ github.ref }}
