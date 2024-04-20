@@ -4,14 +4,16 @@ on:
   push:
     branches: [ main ]
 
+defaults:
+  run:
+    working-directory: helloserver
+
 jobs:
 
   build-and-push:
     runs-on: ubuntu-latest
 
     steps:
-    - working-directory: ./helloserver
-    
     - uses: actions/checkout@v3
     
     - name: Generate Time-Based Tag
