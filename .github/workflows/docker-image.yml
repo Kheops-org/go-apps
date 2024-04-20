@@ -27,7 +27,8 @@ jobs:
       uses: docker/login-action@v2
       with:
         registry: registry.mycompany.com
-        config: ${{ secrets.NATIONTECH_REGISTRY_CONFIG }}
+        username: ${{ secrets.NATIONTECH_REGISTRY_USER }}
+        password: ${{ secrets.NATIONTECH_REGISTRY_PASSWORD }}
 
     - name: Build and Push Docker Image
       uses: docker/build-push-action@v3
