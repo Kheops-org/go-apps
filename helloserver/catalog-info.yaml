@@ -12,6 +12,12 @@ metadata:
     - url: https://github.com/Kheops-org/go-apps/tree/master/helloserver
       title: Source Code
       icon: github
+    - url: https://argocd-server-sreez.apps.oc-med.wk.nt.local/applications/sreez/go-helloserver?view=tree&resource=
+      title: ArgoCD Deployment
+      icon: cached
+    - url: http://localhost:8090
+      title: HyperDX Logs and Monitoring
+      icon: monitor_heart
   tags:
     - go
     - hello-world
