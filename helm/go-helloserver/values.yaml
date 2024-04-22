@@ -8,7 +8,7 @@ image:
   repository: registry.nationtech.io/go-helloserver
   pullPolicy: Always
   # Overrides the image tag whose default is the chart appVersion.
-  tag: 20240422-141829
+  tag: 20240422-144213
 
 imagePullSecrets:
 - name: nationtech-registry-key
