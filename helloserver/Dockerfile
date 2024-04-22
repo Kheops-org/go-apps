@@ -5,7 +5,7 @@ FROM golang:1-bookworm as build
 WORKDIR /app
 
 # Copy the Go module files
-COPY go.mod ./
+COPY go.mod go.sum ./
 
 # Download dependencies
 RUN go mod download

@@ -1,75 +1,97 @@
-// Copyright 2023 The Go Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
-
-// Hello is a simple hello, world demonstration web server.
-//
-// It serves version information on /version and answers
-// any other request like /name by saying "Hello, name!".
-//
-// See golang.org/x/example/outyet for a more sophisticated server.
 package main
 
 import (
-	"flag"
-	"fmt"
-	"html"
+	"context"
+	"io"
 	"log"
 	"net/http"
 	"os"
-	"runtime/debug"
-	"strings"
+
+	"github.com/hyperdxio/opentelemetry-go/otelzap"
+	"github.com/hyperdxio/opentelemetry-logs-go/exporters/otlp/otlplogs"
+	"github.com/hyperdxio/otel-config-go/otelconfig"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+	"go.opentelemetry.io/otel/trace"
+	"go.uber.org/zap"
+	sdk "github.com/hyperdxio/opentelemetry-logs-go/sdk/logs"
+	semconv "go.opentelemetry.io/otel/semconv/v1.21.0"
+	"go.opentelemetry.io/otel/sdk/resource"
 )
 
-func usage() {
-	fmt.Fprintf(os.Stderr, "usage: helloserver [options]\n")
-	flag.PrintDefaults()
-	os.Exit(2)
+// configure common attributes for all logs
+func newResource() *resource.Resource {
+	hostName, _ := os.Hostname()
+	return resource.NewWithAttributes(
+		semconv.SchemaURL,
+		semconv.ServiceVersion("1.0.0"),
+		semconv.HostName(hostName),
+	)
 }
 
-var (
-	greeting = flag.String("g", "Hello", "Greet with `greeting`")
-	addr     = flag.String("addr", "0.0.0.0:8080", "address to serve")
-)
+// attach trace id to the log
+func WithTraceMetadata(ctx context.Context, logger *zap.Logger) *zap.Logger {
+	spanContext := trace.SpanContextFromContext(ctx)
+	if !spanContext.IsValid() {
+		// ctx does not contain a valid span.
+		// There is no trace metadata to add.
+		return logger
+	}
+	return logger.With(
+		zap.String("trace_id", spanContext.TraceID().String()),
+		zap.String("span_id", spanContext.SpanID().String()),
+	)
+}
 
 func main() {
-	// Parse flags.
-	flag.Usage = usage
-	flag.Parse()
+	// Initialize otel config and use it across the entire app
+  println("Service starting up")
 
-	// Parse and validate arguments (none).
-	args := flag.Args()
-	if len(args) != 0 {
-		usage()
+	otelShutdown, err := otelconfig.ConfigureOpenTelemetry()
+	if err != nil {
+		log.Fatalf("error setting up OTel SDK - %e", err)
+	}
+	defer otelShutdown()
+
+	ctx := context.Background()
+
+	// configure opentelemetry logger provider
+	logExporter, _ := otlplogs.NewExporter(ctx)
+	loggerProvider := sdk.NewLoggerProvider(
+		sdk.WithBatcher(logExporter),
+	)
+	// gracefully shutdown logger to flush accumulated signals before program finish
+	defer loggerProvider.Shutdown(ctx)
+
+	// create new logger with opentelemetry zap core and set it globally
+	logger := zap.New(otelzap.NewOtelCore(loggerProvider))
+	zap.ReplaceGlobals(logger)
+	logger.Warn("hello world", zap.String("foo", "bar"))
+
+	http.Handle("/", otelhttp.NewHandler(wrapHandler(logger, ExampleHandler), "example-service"))
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
 	}
 
-	// Register handlers.
-	// All requests not otherwise mapped with go to greet.
-	// /version is mapped specifically to version.
-	http.HandleFunc("/", greet)
-	http.HandleFunc("/version", version)
-
-	log.Printf("serving http://%s\n", *addr)
-	log.Fatal(http.ListenAndServe(*addr, nil))
+	logger.Info("** Service Started on Port " + port + " **")
+	println("** Service Started on Port " + port + " **")
+	if err := http.ListenAndServe(":"+port, nil); err != nil {
+		logger.Fatal(err.Error())
+	}
 }
 
-func version(w http.ResponseWriter, r *http.Request) {
-	info, ok := debug.ReadBuildInfo()
-	if !ok {
-		http.Error(w, "no build information available", 500)
-		return
+// Use this to wrap all handlers to add trace metadata to the logger
+func wrapHandler(logger *zap.Logger, handler http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		logger := WithTraceMetadata(r.Context(), logger)
+		logger.Info("request received", zap.String("url", r.URL.Path), zap.String("method", r.Method))
+		handler(w, r)
+		logger.Info("request completed", zap.String("path", r.URL.Path), zap.String("method", r.Method))
 	}
-
-	fmt.Fprintf(w, "<!DOCTYPE html>\n<pre>\n")
-	fmt.Fprintf(w, "%s\n", html.EscapeString(info.String()))
 }
 
-func greet(w http.ResponseWriter, r *http.Request) {
-	name := strings.Trim(r.URL.Path, "/")
-	if name == "" {
-		name = "Gopher"
-	}
-
-	fmt.Fprintf(w, "<!DOCTYPE html>\n")
-	fmt.Fprintf(w, "%s, %s!\n", *greeting, html.EscapeString(name))
+func ExampleHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Content-Type", "application/json")
+	io.WriteString(w, `{"status":"ok"}`)
 }
