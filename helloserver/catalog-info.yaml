@@ -24,6 +24,7 @@ metadata:
   annotations:
     argocd/app-name: go-helloserver
     grafana/dashboard-selector: go-helloserver
+    grafana/dahsboard-viewer: go-helloserver
 spec:
   type: service
   lifecycle: experimental
