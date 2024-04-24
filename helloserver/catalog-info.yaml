@@ -23,9 +23,9 @@ metadata:
     - hello-world
   annotations:
     argocd/app-name: go-helloserver
-    grafana/dashboard-selector: go-helloserver
-    grafana/dahsboard-viewer: 'http://localhost:4000/dashboard/new?orgId=1'
-    grafana/overview-dashboard: 'http://localhost:4000/dashboard/new?orgId=1'
+    grafana/dashboard-selector: master
+    grafana/dahsboard-viewer: 'http://localhost:4000/d/bdjmzxge5vsowe/master?orgId=1&refresh=10s&from=1713965449542&to=1713966349542&viewPanel=1'
+    grafana/overview-dashboard: 'http://localhost:4000/d/bdjmzxge5vsowe/master?orgId=1&refresh=10s&from=1713965449542&to=1713966349542&viewPanel=1'
 spec:
   type: service
   lifecycle: experimental
