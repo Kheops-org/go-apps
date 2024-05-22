@@ -1,6 +1,6 @@
 schemaVersion: 2.2.2
 metadata:
-  name: bash
+  name: golang
 components:
   - name: tools
     container:
