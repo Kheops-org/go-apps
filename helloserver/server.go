@@ -93,5 +93,5 @@ func wrapHandler(logger *zap.Logger, handler http.HandlerFunc) http.HandlerFunc 
 
 func ExampleHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content-Type", "application/json")
-  io.WriteString(w, `{"status":"okkkk", "demo": "brizo" }`)
+  io.WriteString(w, `{"status":"ok", "demo": "brizo" }`)
 }
