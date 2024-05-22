@@ -4,13 +4,13 @@ metadata:
 components:
   - name: tools
     container:
-      image: quay.io/devfile/golang:ubi8-latest
+      image: quay.io/devfile/golang:latest
       memoryLimit: 3Gi
 
 commands:
   - id: run-application
     exec:
-      label: "Run main.sh script"
+      label: "Run server.go"
       component: tools
       workingDir: '${PROJECT_SOURCE}'
       commandLine: "go run server.go"
